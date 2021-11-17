@@ -29,7 +29,7 @@ func TestCookieSameSite(t *testing.T) {
 		assert.Check(t, err)
 
 		cookies := resp.Result().Cookies()
-		assert.Check(t, is.Len(cookies, 1), "Expected to have a cookie set")
+		assert.Check(t, is.Len(cookies, 2), "Expected to have a cookie set")
 
 		return cookies[0]
 	}

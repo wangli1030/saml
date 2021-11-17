@@ -3,12 +3,15 @@ package samlsp
 import (
 	"net"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/crewjam/saml"
 )
 
 const defaultSessionCookieName = "token"
+const cookieMaxLength = 1000
 
 var _ SessionProvider = CookieSessionProvider{}
 
@@ -42,11 +45,28 @@ func (c CookieSessionProvider) CreateSession(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return err
 	}
-
+	var cookieList []string
+	for i := 0; i < len(value); i = i + cookieMaxLength {
+		end := i + cookieMaxLength
+		if end > len(value) {
+			end = len(value)
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     c.Name + strconv.Itoa(i),
+			Domain:   c.Domain,
+			Value:    value[i:end],
+			MaxAge:   int(c.MaxAge.Seconds()),
+			HttpOnly: c.HTTPOnly,
+			Secure:   c.Secure || r.URL.Scheme == "https",
+			SameSite: c.SameSite,
+			Path:     "/",
+		})
+		cookieList = append(cookieList, c.Name+strconv.Itoa(i))
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     c.Name,
 		Domain:   c.Domain,
-		Value:    value,
+		Value:    strings.Join(cookieList, ","),
 		MaxAge:   int(c.MaxAge.Seconds()),
 		HttpOnly: c.HTTPOnly,
 		Secure:   c.Secure || r.URL.Scheme == "https",
@@ -90,8 +110,19 @@ func (c CookieSessionProvider) GetSession(r *http.Request) (Session, error) {
 	} else if err != nil {
 		return nil, err
 	}
+	cookieList := strings.Split(cookie.Value, ",")
+	var sessionValue string
+	for _, s := range cookieList {
+		cookie, err := r.Cookie(s)
+		if err == http.ErrNoCookie {
+			return nil, ErrNoSession
+		} else if err != nil {
+			return nil, err
+		}
+		sessionValue = sessionValue + cookie.Value
+	}
 
-	session, err := c.Codec.Decode(cookie.Value)
+	session, err := c.Codec.Decode(sessionValue)
 	if err != nil {
 		return nil, ErrNoSession
 	}
