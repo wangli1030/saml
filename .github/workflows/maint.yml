@@ -16,7 +16,7 @@ jobs:
         run: |
           (
             cd $(mktemp -d)
-            go get github.com/crewjam/goupdate
+            go get github.com/wangli1030/goupdate
           )
           git config --global user.email noreply@github.com
           git config --global user.name "Github Actions"

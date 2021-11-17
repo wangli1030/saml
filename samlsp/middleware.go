@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"net/http"
 
-	"github.com/crewjam/saml"
+	"github.com/wangli1030/saml"
 )
 
 // Middleware implements middleware than allows a web application
