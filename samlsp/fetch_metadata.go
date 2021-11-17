@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/crewjam/httperr"
 	xrv "github.com/mattermost/xml-roundtrip-validator"
-	"github.com/wangli1030/httperr"
 
 	"github.com/wangli1030/saml"
 )
