@@ -11,7 +11,7 @@ import (
 )
 
 const defaultSessionCookieName = "token"
-const cookieMaxLength = 1000
+const cookieMaxLength = 3000
 
 var _ SessionProvider = CookieSessionProvider{}
 
